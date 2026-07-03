@@ -1,60 +1,40 @@
-import './style.css'
-import typescriptLogo from './assets/typescript.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import { setupCounter } from './counter.ts'
+import { TemporalEngine } from "./lib/engine/TemporalEngine";
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-<section id="center">
-  <div class="hero">
-    <img src="${heroImg}" class="base" width="170" height="179">
-    <img src="${typescriptLogo}" class="framework" alt="TypeScript logo"/>
-    <img src="${viteLogo}" class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/main.ts</code> and save to test <code>HMR</code></p>
-  </div>
-  <button id="counter" type="button" class="counter"></button>
-</section>
+console.log("🚀 Starting the test TemporalEngine...");
 
-<div class="ticks"></div>
+// 1. Testing primitives(without cloning)
+const numberEngine = new TemporalEngine<number>(10, false);
+numberEngine.set(20);
+numberEngine.set(30);
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#documentation-icon"></use></svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank">
-          <img class="logo" src="${viteLogo}" alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://www.typescriptlang.org" target="_blank">
-          <img class="button-icon" src="${typescriptLogo}" alt="">
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#social-icon"></use></svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li><a href="https://github.com/vitejs/vite" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#github-icon"></use></svg>GitHub</a></li>
-      <li><a href="https://chat.vite.dev/" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#discord-icon"></use></svg>Discord</a></li>
-      <li><a href="https://x.com/vite_js" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#x-icon"></use></svg>X.com</a></li>
-      <li><a href="https://bsky.app/profile/vite.dev" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#bluesky-icon"></use></svg>Bluesky</a></li>
-    </ul>
-  </div>
-</section>
+console.log("--- Primitives test ---");
+console.log("Current (is expected 30):", numberEngine.getPresent()); // 30
+numberEngine.undo();
+console.log("After Undo (is expected 20):", numberEngine.getPresent()); // 20
+numberEngine.redo();
+console.log("After Redo (is expected 30):", numberEngine.getPresent()); // 30
+numberEngine.undo();
+numberEngine.undo();
+console.log("After double Redo (is expected 10):", numberEngine.getPresent()); // 10
 
-<div class="ticks"></div>
-<section id="spacer"></section>
-`
+// 2. Testing complex objects (with cloning)
+interface IState {
+  user: { name: string };
+  score: number;
+}
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+const initialObj: IState = { user: { name: "Ilya" }, score: 100 };
+const objectEngine = new TemporalEngine<IState>(initialObj, true); // Enable clone
+
+// We are macking changes
+const state2 = { user: { name: "Alex" }, score: 200 };
+objectEngine.set(state2);
+
+// We simulate a dangerous mutation of an external object.
+state2.user.name = "MUTATED_NAME";
+state2.score = 999;
+
+console.log("\n--- Object cloning test ---");
+console.log("Current (is expected  MUTATED_NAME/999 due to a mutation):", objectEngine.getPresent());
+objectEngine.undo();
+console.log("After Undo (is expected Ilya/100 - history must not suffer!):", objectEngine.getPresent());

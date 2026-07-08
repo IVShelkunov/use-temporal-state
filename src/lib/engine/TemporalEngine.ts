@@ -3,12 +3,19 @@ export class TemporalEngine<T> {
     private present: T;
     private future: T[] = [];
     private clone: boolean;
-    constructor(initialValue: T, clone: boolean = false) {
+    private limit: number;
+    constructor(initialValue: T, clone: boolean = false, limit: number = Infinity) {
         this.clone = clone;
         this.present = this.cloneValue(initialValue);
+        this.limit = limit;
     }
     private cloneValue(value: T): T {
         return this.clone ? structuredClone(value) : value;
+    }
+    private cutHistory(): void {
+        if (this.past.length > this.limit) {
+            this.past.shift();
+        }
     }
     public getPresent(): T {
         return this.present;
@@ -26,10 +33,16 @@ export class TemporalEngine<T> {
     public canRedo(): boolean {
         return this.future.length !== 0;
     }
-    public set(newValue: T): void {
-        this.past.push(this.cloneValue(this.present));
-        this.present = this.cloneValue(newValue);
-        this.future = [];
+    public set(newValue: T, skipHistory: boolean = false): void {
+        if (skipHistory) {
+            this.present = this.cloneValue(newValue);
+        } else {
+            this.past.push(this.cloneValue(this.present));
+            this.cutHistory();
+            this.present = this.cloneValue(newValue);
+            this.future = [];
+        }
+
     }
     public undo(): boolean {
         if (this.canUndo()) {
@@ -48,6 +61,7 @@ export class TemporalEngine<T> {
             const lastState = this.future.pop();
             if (lastState !== undefined) {
                 this.past.push(this.cloneValue(this.present));
+                this.cutHistory();
                 this.present = this.cloneValue(lastState);
             }
             return true;

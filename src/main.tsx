@@ -5,8 +5,10 @@ import "./style.css";
 
 function App() {
   const [text, setText, { undo, redo, clear, canUndo, canRedo, history }] =
-    useTemporal("Hello", { clone: true });
-
+    useTemporal("Hello", { clone: true, limit: 3 });
+  const handleUpdateGhostText = (value: string) => {
+    setText(value, true);
+  };
   return (
     <main
       style={{
@@ -14,137 +16,126 @@ function App() {
         fontFamily: "sans-serif",
         color: "#f8fafc",
         backgroundColor: "#0f172a",
-        display: "flex",
-        justifyItems: "center",
-        alignItems: "center",
-        height: "100vh",
+        minHeight: "100vh",
       }}
     >
       <div style={{ maxWidth: "500px", margin: "0 auto" }}>
-        <h1
-          style={{ fontSize: "24px", marginBottom: "20px", color: "#8d93b3" }}
-        >
-          useTemporal Test App
+        <h1 style={{ fontWeight: "bold", fontSize: "30px", color: "#f4f4f4" }}>
+          Limit and history skip test{" "}
         </h1>
 
-        {/* Input */}
-        <input
-          type="text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
+        {/* inputs */}
+        <div
           style={{
-            width: "100%",
-            padding: "12px",
-            fontSize: "16px",
-            borderRadius: "8px",
-            border: "1px solid #334155",
-            backgroundColor: "#1e293b",
-            color: "#fff",
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
             marginBottom: "20px",
-            boxSizing: "border-box",
           }}
-        />
+        >
+          <div>
+            <label style={{ fontSize: "12px", color: "#94a3b8" }}>
+              Main input (record history):
+            </label>
+            <input
+              type="text"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px",
+                background: "#1e293b",
+                color: "#fff",
+                border: "1px border #334155",
+              }}
+            />
+          </div>
+          <div>
+            <label style={{ fontSize: "12px", color: "#94a3b8" }}>
+              "Ghost" input (it doesn't history, skipHistory):
+            </label>
+            <input
+              type="text"
+              value={text}
+              onChange={(e) => handleUpdateGhostText(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px",
+                background: "#1e293b",
+                color: "#38bdf8",
+                border: "1px border #334155",
+              }}
+            />
+          </div>
+        </div>
 
-        {/* History dashboard */}
-        <div style={{ display: "flex", gap: "10px", marginBottom: "30px" }}>
+        {/* buttons */}
+        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
           <button
             onClick={undo}
             disabled={!canUndo}
             style={{
-              padding: "10px 16px",
-              borderRadius: "6px",
-              border: "none",
-              backgroundColor: canUndo ? "#4f46e5" : "#334155",
-              color: canUndo ? "#fff" : "#94a3b8",
-              cursor: canUndo ? "pointer" : "not-allowed",
-              fontWeight: "bold",
+              padding: "8px 16px",
+              background: canUndo ? "#4f46e5" : "#1e1b4b",
+              color: "#fff",
             }}
           >
-            ← Undo
+            Undo
           </button>
-
           <button
             onClick={redo}
             disabled={!canRedo}
             style={{
-              padding: "10px 16px",
-              borderRadius: "6px",
-              border: "none",
-              backgroundColor: canRedo ? "#4f46e5" : "#334155",
-              color: canRedo ? "#fff" : "#94a3b8",
-              cursor: canRedo ? "pointer" : "not-allowed",
-              fontWeight: "bold",
+              padding: "8px 16px",
+              background: canRedo ? "#4f46e5" : "#1e1b4b",
+              color: "#fff",
             }}
           >
-            Redo →
+            Redo
           </button>
-
           <button
             onClick={clear}
             style={{
-              padding: "10px 16px",
-              borderRadius: "6px",
-              border: "none",
-              backgroundColor: "#ef4444",
+              padding: "8px 16px",
+              background: "#ef4444",
               color: "#fff",
-              cursor: "pointer",
-              fontWeight: "bold",
-              marginLeft: "auto",
             }}
           >
             Clear History
           </button>
         </div>
 
-        {/* Reactive history array display section */}
+        {/* history dashboard */}
         <div
           style={{
-            padding: "20px",
-            backgroundColor: "#1e293b",
+            padding: "15px",
+            background: "#0f172a",
+            border: "1px solid #1e293b",
             borderRadius: "8px",
-            border: "1px solid #334155",
           }}
         >
           <h3
+            style={{ fontSize: "14px", margin: "0 0 10px 0", color: "#38bdf8" }}
+          >
+            History (Limit: 3 steps):
+          </h3>
+          <ul
             style={{
-              margin: "0 0 10px 0",
-              fontSize: "14px",
-              textTransform: "uppercase",
+              margin: 0,
+              paddingLeft: "20px",
+              fontSize: "13px",
               color: "#94a3b8",
-              letterSpacing: "1px",
             }}
           >
-            History Log ({history.length} steps)
-          </h3>
-          {history.length === 0 ? (
-            <p style={{ color: "#64748b", margin: 0, fontSize: "14px" }}>
-              История пуста
-            </p>
-          ) : (
-            <ul
-              style={{
-                margin: 0,
-                paddingLeft: "20px",
-                fontSize: "14px",
-                color: "#cbd5e1",
-              }}
-            >
-              {history.map((step, index) => (
-                <li key={index} style={{ marginBottom: "6px" }}>
-                  Step {index + 1}:{" "}
-                  <span style={{ fontWeight: "bold", color: "#818cf8" }}>
-                    "{step}"
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
+            {history.map((h, i) => (
+              <li key={i}>{h}</li>
+            ))}
+          </ul>
         </div>
       </div>
     </main>
   );
 }
-
 // Render app in the root div
 const rootElement = document.getElementById("app");
 if (rootElement) {

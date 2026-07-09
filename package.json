@@ -1,21 +1,36 @@
 {
   "name": "use-temporal-state",
-  "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "High-performance temporal state manager (undo/redo) for React and TypeScript.",
   "type": "module",
+  "author": "IVShelkunov",
+  "license":"MIT",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsup",
     "preview": "vite preview"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "tsup": "^8.5.1",
     "typescript": "~6.0.2",
     "vite": "^8.1.1"
   },
-  "dependencies": {
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+   "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
   }
 }

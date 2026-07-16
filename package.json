@@ -1,5 +1,5 @@
 {
-  "name": "use-temporal-state",
+  "name": "use-temporal-state-history",
   "version": "1.0.0",
   "description": "High-performance temporal state manager (undo/redo) for React and TypeScript.",
   "type": "module",

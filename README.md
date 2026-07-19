@@ -1,28 +1,47 @@
-# Vector Whiteboard
+# use-temporal-state-history
 
-> Interactive vector drawing application built to demonstrate the capabilities of [use-temporal-state-history](https://www.npmjs.com/package/use-temporal-state-history).
+> A high-performance, lightweight React hook for managing state with full time-travel (undo/redo) capabilities.
 
-[🔗 Live Demo](https://your-vercel-link.vercel.app/)
+## 🚀 Features
+- **Time Travel:** Built-in undo/redo functionality.
+- **Strict Typing:** Written in TypeScript with full Generic support.
+- **Memory Efficient:** Customizable history limit to prevent memory leaks.
+- **Mutable Safe:** Optional deep cloning (via `structuredClone`) to prevent state mutation bugs.
+- **Skip Logic:** Ability to update state without creating a new history entry.
 
-![Whiteboard Demo](https://github.com/user-attachments/assets/8d77a9b3-bba7-464d-8d4e-5244fbf29429)
+## 📦 Installation
+```bash
+pnpm add use-temporal-state-history
+```
 
-## 🎯 About
-This application is a proof-of-concept project demonstrating how to build a complex state-driven canvas application using custom React hooks. It features smooth vector rendering and advanced state management.
+## 🛠 Usage
+```tsx
+import { useTemporal } from 'use-temporal-state-history';
 
-## ✨ Core Features
-* **Vector Rendering:** Custom implementation using HTML5 Canvas API.
-* **Undo/Redo Engine:** Powered by my custom library to handle non-destructive state changes.
-* **Responsive Design:** Canvas automatically scales to the container, with precise coordinate mapping for mouse/touch inputs.
-* **Sci-Fi Aesthetic:** Dark-themed UI with procedural "circuit board" background effects.
+function MyComponent() {
+  const [text, setText, { undo, redo, canUndo, canRedo }] = useTemporal("", { 
+    clone: true, 
+    limit: 20 
+  });
 
-## 🛠 Tech Stack
-* **Framework:** React + Vite
-* **Language:** TypeScript
-* **Styling:** Tailwind CSS v4
-* **State Management:** [use-temporal-state-history](https://www.npmjs.com/package/use-temporal-state-history)
-* **Rendering:** HTML5 Canvas API
+  return (
+    <div>
+      <input value={text} onChange={(e) => setText(e.target.value)} />
+      <button onClick={undo} disabled={!canUndo}>Undo</button>
+      <button onClick={redo} disabled={!canRedo}>Redo</button>
+    </div>
+  );
+}
+```
 
-## 🚀 Running Locally
-1. `git clone https://github.com/IVShelkunov/vector-whiteboard.git`
-2. `pnpm install`
-3. `pnpm dev`
+## ⚙️ Options
+| Option | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `clone` | boolean | `false` | Enables deep cloning for complex objects. |
+| `limit` | number | `Infinity` | Maximum history steps to keep in memory. |
+
+## 📄 License
+MIT
+```
+
+---
